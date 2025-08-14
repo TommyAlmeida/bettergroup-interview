@@ -2,7 +2,6 @@ from typing import Optional
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete, select, and_
-from sqlalchemy.orm import selectinload
 from typing import List, Optional
 
 from app.features.projects.models import Project, ProjectMembership
