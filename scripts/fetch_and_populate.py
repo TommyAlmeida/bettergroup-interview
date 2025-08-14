@@ -18,7 +18,6 @@ from app.features.users.service import UserService
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-
 def extract_domain_and_company(email: str) -> tuple[str, str]:
     domain = email.split("@")[1]
     company_name = domain.split(".")[0].capitalize()
@@ -65,10 +64,16 @@ async def sync_companies_and_users(db, emails: List[str]):
             companies_cache[company_name] = company
             users_cache[company_name] = []
 
-        user = await users_service.create_user(email, companies_cache[company_name].id)
-        users_cache[company_name].append(user)
+        existing_user = await users_service.get_user_by_email(email)
+        
+        if existing_user:
+            logger.info(f"User already exists: {email}, skipping creation")
+            user = existing_user
+        else:
+            user = await users_service.create_user(email, companies_cache[company_name].id)
+            logger.info(f"User created: {email}")
 
-        logger.info(f"User created: {email}")
+        users_cache[company_name].append(user)
 
     return companies_cache, users_cache
 
@@ -78,15 +83,26 @@ async def assign_projects(db, companies_cache, users_cache):
     for company_name, company in companies_cache.items():
         project_names = [f"{company_name} Sample Project 1", f"{company_name} Sample Project 2"]
 
-        projects = [
-            await projects_service.create_project(name, company.id)
-            for name in project_names
-        ]
+        projects = []
+        for name in project_names:
+            existing_project = await projects_service.get_project_by_name_and_company(name, company.id)
+            
+            if existing_project:
+                logger.info(f"Project already exists: {name}, using existing project")
+                project = existing_project
+            else:
+                project = await projects_service.create_project(name, company.id)
+                logger.info(f"Project created: {name}")
+            
+            projects.append(project)
 
         for user in users_cache[company_name]:
             for project in projects:
-                await projects_service.add_user_to_project(project.id, user.id)
-                logger.info(f"Assigned {user.email} to project {project.name}")
+                membership = await projects_service.add_user_to_project(project.id, user.id)
+                if membership:
+                    logger.info(f"Assigned {user.email} to project {project.name}")
+                else:
+                    logger.info(f"User {user.email} already assigned to project {project.name}")
 
 async def main():
     emails = await fetch_emails()

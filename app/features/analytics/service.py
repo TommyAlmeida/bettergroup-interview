@@ -36,34 +36,44 @@ class AnalyticsService:
         return result.scalar_one()
     
     async def _get_avg_users_per_company(self) -> float:
-        result = await self.db.execute(
-            select(func.avg(func.count(User.id)))
+        subquery = (
+            select(func.count(User.id).label('user_count'))
             .select_from(User)
             .group_by(User.company_id)
+        ).subquery()
+        
+        result = await self.db.execute(
+            select(func.avg(subquery.c.user_count))
         )
-
+        
         avg = result.scalar()
-
         return float(avg) if avg else 0.0
 
+
     async def _get_avg_projects_per_company(self) -> float:
-        result = await self.db.execute(
-            select(func.avg(func.count(Project.id)))
+        subquery = (
+            select(func.count(Project.id).label('project_count'))
             .select_from(Project)
             .group_by(Project.company_id)
+        ).subquery()
+        
+        result = await self.db.execute(
+            select(func.avg(subquery.c.project_count))
         )
-
+        
         avg = result.scalar()
-
         return float(avg) if avg else 0.0
 
     async def _get_avg_members_per_project(self) -> float:
-        result = await self.db.execute(
-            select(func.avg(func.count(ProjectMembership.id)))
+        subquery = (
+            select(func.count(ProjectMembership.id).label('member_count'))
             .select_from(ProjectMembership)
             .group_by(ProjectMembership.project_id)
+        ).subquery()
+        
+        result = await self.db.execute(
+            select(func.avg(subquery.c.member_count))
         )
-
+        
         avg = result.scalar()
-
         return float(avg) if avg else 0.0

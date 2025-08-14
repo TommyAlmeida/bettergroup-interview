@@ -18,11 +18,13 @@ services:
       retries: 5
   app:
     build: .
-    command: uvicorn app.main:app --host ${APP_HOST:-0.0.0.0} --port ${APP_PORT:-8000} --reload
+    command: ./scripts/docker-init.sh
     ports:
       - "8000:8000"
     volumes:
       - .:/usr/src/app
+    env_file:
+      - .env
     depends_on:
       db:
         condition: service_healthy

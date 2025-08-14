@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from typing import List, Optional
-import uuid
+from uuid import UUID
 
 from app.features.companies.models import Company
 from app.features.users.models import User
@@ -15,7 +15,7 @@ class CompanyService:
 
         return list(result.scalars().all())
 
-    async def get_company_by_id(self, company_id: uuid.UUID) -> Optional[Company]:
+    async def get_company_by_id(self, company_id: UUID) -> Optional[Company]:
         result = await self.session.execute(
             select(Company).where(Company.id == company_id)
         )
@@ -36,13 +36,13 @@ class CompanyService:
 
         return result.scalar_one_or_none()
 
-    async def get_company_users(self, company_id: uuid.UUID) -> List[User]:
+    async def get_company_users(self, company_id: UUID) -> List[User]:
         result = await self.session.execute(
             select(User).where(User.company_id == company_id)
         )
 
         return list(result.scalars().all())
-
+    
 
     async def create_company(self, name: str, domain: str) -> Company:
         existing = await self.get_company_by_domain(domain)

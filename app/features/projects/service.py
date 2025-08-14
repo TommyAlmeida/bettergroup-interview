@@ -1,4 +1,3 @@
-from typing import Optional
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete, select, and_
@@ -110,3 +109,16 @@ class ProjectService:
         await self.session.commit()
         
         return result.rowcount > 0
+    
+
+    async def get_project_by_name_and_company(self, name: str, company_id: UUID) -> Optional[Project]:
+        result = await self.session.execute(
+            select(Project).where(
+                and_(
+                    Project.name == name,
+                    Project.company_id == company_id
+                )
+            )
+        )
+        
+        return result.scalar_one_or_none()
