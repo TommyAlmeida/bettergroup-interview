@@ -47,6 +47,9 @@ app = FastAPI(
 
 app.openapi = custom_openapi
 
+instrumentator = Instrumentator()
+instrumentator.instrument(app).expose(app)
+
 app.middleware("http")
 async def api_key_middleware(request: Request, call_next):
     if request.url.path in ["/docs", "/openapi.json"]:

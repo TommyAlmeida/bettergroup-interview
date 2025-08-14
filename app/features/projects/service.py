@@ -9,8 +9,8 @@ from app.features.users.models import User
 
 
 class ProjectService:
-    def __init__(self, db: AsyncSession):
-        self.db = db
+    def __init__(self, session: AsyncSession):
+        self.session = session
 
     async def create_project(self, name: str, company_id: UUID) -> Project:
         project = Project(
@@ -18,15 +18,15 @@ class ProjectService:
             company_id=company_id
         )
 
-        self.db.add(project)
+        self.session.add(project)
 
-        await self.db.commit()
-        await self.db.refresh(project)
+        await self.session.commit()
+        await self.session.refresh(project)
 
         return project
 
     async def get_project_by_id(self, project_id: UUID) -> Optional[Project]:
-        result = await self.db.execute(
+        result = await self.session.execute(
             select(Project).where(Project.id == project_id)
         )
       
@@ -39,12 +39,12 @@ class ProjectService:
             query = query.where(Project.company_id == company_id)
         query = query.order_by(Project.name)
         
-        result = await self.db.execute(query)
+        result = await self.session.execute(query)
 
         return list(result.scalars().all())
 
     async def get_project_members(self, project_id: UUID) -> List[User]:
-        result = await self.db.execute(
+        result = await self.session.execute(
             select(User)
             .join(ProjectMembership)
             .where(ProjectMembership.project_id == project_id)
@@ -54,7 +54,7 @@ class ProjectService:
         return list(result.scalars().all())
 
     async def add_user_to_project(self, project_id: UUID, user_id: UUID) -> Optional[ProjectMembership]:
-        existing = await self.db.execute(
+        existing = await self.session.execute(
             select(ProjectMembership).where(
                 and_(
                     ProjectMembership.project_id == project_id,
@@ -66,7 +66,7 @@ class ProjectService:
         if existing.scalar_one_or_none():
             return None
 
-        project_result = await self.db.execute(
+        project_result = await self.session.execute(
             select(Project).where(Project.id == project_id)
         )
 
@@ -75,7 +75,7 @@ class ProjectService:
         if not project:
             return None
 
-        user_result = await self.db.execute(
+        user_result = await self.session.execute(
             select(User).where(User.id == user_id)
         )
 
@@ -90,15 +90,15 @@ class ProjectService:
             company_id=project.company_id
         )
 
-        self.db.add(membership)
+        self.session.add(membership)
 
-        await self.db.commit()
-        await self.db.refresh(membership)
+        await self.session.commit()
+        await self.session.refresh(membership)
 
         return membership
 
     async def remove_user_from_project(self, project_id: UUID, user_id: UUID) -> bool:
-        result = await self.db.execute(
+        result = await self.session.execute(
             delete(ProjectMembership).where(
                 and_(
                     ProjectMembership.project_id == project_id,
@@ -107,6 +107,6 @@ class ProjectService:
             )
         )
 
-        await self.db.commit()
+        await self.session.commit()
         
         return result.rowcount > 0

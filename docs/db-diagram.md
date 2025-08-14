@@ -1,6 +1,22 @@
-# DB Diagram
+# Database Schema
 
-::: mermaid
+## Core Tables
+
+**companies**: Organizations with domains
+**users**: People belonging to companies
+**projects**: Projects owned by companies
+**project_memberships**: User-project relationships
+
+## Key Design Decisions
+
+**UUID Primary Keys**: Better for distributed systems
+**Company-Centric**: All entities flow from companies
+**Denormalized company_id**: In memberships for faster queries
+**Cascade Delete**s: Maintain referential integrity
+ 
+Few more in [Design Choices](./db-design-choices.md)
+
+``` mermaid 
 erDiagram
     companies {
         uuid id PK
@@ -37,4 +53,4 @@ erDiagram
     companies ||--o{ project_memberships : "controls all access"
     users ||--o{ project_memberships : "can be members"
     projects ||--o{ project_memberships : "can have members"
-:::
+```

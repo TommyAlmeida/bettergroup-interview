@@ -95,7 +95,7 @@ async def main():
         logger.error("No emails fetched.")
         return
     
-    async with get_session() as db:
+    async for db in get_session():
         companies_cache, users_cache = await sync_companies_and_users(db, emails)
 
         await assign_projects(db, companies_cache, users_cache)
