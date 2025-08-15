@@ -5,8 +5,12 @@ from app.core.config import get_settings
 
 Base = declarative_base()
 
-engine = create_async_engine(get_settings().database_url, echo=True, future=True)
+engine = create_async_engine(
+    get_settings().database_url,
+    echo=True,
+    future=True)
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
+
 
 async def get_session():
     async with async_session_maker() as session:

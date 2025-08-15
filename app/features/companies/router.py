@@ -9,13 +9,20 @@ from uuid import UUID
 
 router = APIRouter()
 
+
 @router.get("/companies", response_model=List[CompanyResponse])
 async def list_companies(
     company_service: CompanyService = Depends(get_company_service),
 ):
     companies = await company_service.get_all_companies()
 
-    return [CompanyResponse.model_validate(company, from_attributes=True) for company in companies]
+    return [
+        CompanyResponse.model_validate(
+            company,
+            from_attributes=True
+        ) for company in companies
+    ]
+
 
 @router.get("/companies/{company_id}", response_model=CompanyResponse)
 async def get_company(
@@ -26,10 +33,12 @@ async def get_company(
 
     if not company:
         raise HTTPException(status_code=404, detail="Company not found")
-    
+
     return CompanyResponse.model_validate(company, from_attributes=True)
 
-@router.get("/companies/{company_id}/users", response_model=CompanyWithUsersResponse)
+
+@router.get("/companies/{company_id}/users",
+            response_model=CompanyWithUsersResponse)
 async def get_company_users(
     company_id: UUID,
     company_service: CompanyService = Depends(get_company_service),
@@ -42,14 +51,16 @@ async def get_company_users(
     users = await company_service.get_company_users(company_id)
 
     if not users:
-        raise HTTPException(status_code=404, detail="No users found for this company")
-    
+        raise HTTPException(status_code=404,
+                            detail="No users found for this company")
+
     return CompanyWithUsersResponse(
         id=company.id,
         name=company.name,
         domain=company.domain,
         users=[UserResponse.model_validate(user) for user in users]
     )
+
 
 @router.post("/companies", response_model=CompanyResponse, status_code=201)
 async def create_company(

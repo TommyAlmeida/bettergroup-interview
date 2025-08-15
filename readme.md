@@ -38,7 +38,7 @@ docker-compose exec project_management_app python fetch_and_populate.py
 ### Without Docker
 ```bash
 # This creates .venv and installs the requirements.txt
-source ~./init.sh # (By the way: i dont own this script, but its pretty helpful)
+source ~./scripts/env-init.sh # (By the way: i dont own this script, but its pretty helpful)
 
 # Run migrations
 alembic upgrade head

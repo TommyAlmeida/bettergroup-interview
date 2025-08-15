@@ -18,6 +18,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
+
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
@@ -45,6 +46,7 @@ def custom_openapi():
 
     return app.openapi_schema
 
+
 app.openapi = custom_openapi
 app.add_middleware(APIKeyMiddleware)
 
@@ -52,9 +54,15 @@ app.include_router(companies.router, prefix="/api/v1", tags=["companies"])
 app.include_router(analytics.router, prefix="/api/v1", tags=["analytics"])
 app.include_router(projects.router, prefix="/api/v1", tags=["projects"])
 
+
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
 
+
 if __name__ == "__main__":
-    uvicorn.run(app, host=settings.app_host, port=settings.app_port, log_level="info")
+    uvicorn.run(
+        app,
+        host=settings.app_host,
+        port=settings.app_port,
+        log_level="info")
