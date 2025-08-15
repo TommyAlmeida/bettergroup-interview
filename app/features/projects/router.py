@@ -3,12 +3,10 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.core.dependencies import get_company_service, get_project_service
-from app.core.dependencies import get_project_service
 from app.features.companies.service import CompanyService
 from app.features.projects.schemas import ProjectCreate, ProjectMembershipCreate, ProjectMembershipResponse, ProjectResponse, ProjectWithMembersResponse, ProjectWithMembersResponse
 from app.features.projects.service import ProjectService
 from app.features.users.schemas import UserResponse
-
 
 router = APIRouter()
 
@@ -86,7 +84,7 @@ async def remove_user_from_project(
     if not success:
         raise HTTPException(status_code=404, detail="Membership not found")
 
-    return success  
+    return success
 
 @router.get("/projects/{project_id}/members", response_model=List[UserResponse])
 async def get_project_members(

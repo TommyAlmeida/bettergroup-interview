@@ -6,10 +6,10 @@ from app.features.users.models import User
 from sqlalchemy.ext.asyncio import AsyncSession
 
 class AnalyticsService:
-    def __init__(self, db: AsyncSession):
-        self.db = db
+    def __init__(self, session: AsyncSession):
+        self.session = session
 
-    # In a real world application i would put this into a tdbms
+    # In a real-world application I would put this into a time series database like Prometheus
     async def get_platform_analytics(self) -> AnalyticsResponse:
         companies_count = await self._get_count(Company)
         users_count = await self._get_count(User)
@@ -31,7 +31,7 @@ class AnalyticsService:
         )
 
     async def _get_count(self, model) -> int:
-        result = await self.db.execute(select(func.count(model.id)))
+        result = await self.session.execute(select(func.count(model.id)))
 
         return result.scalar_one()
     
@@ -42,11 +42,12 @@ class AnalyticsService:
             .group_by(User.company_id)
         ).subquery()
         
-        result = await self.db.execute(
+        result = await self.session.execute(
             select(func.avg(subquery.c.user_count))
         )
         
         avg = result.scalar()
+
         return float(avg) if avg else 0.0
 
 
@@ -57,11 +58,12 @@ class AnalyticsService:
             .group_by(Project.company_id)
         ).subquery()
         
-        result = await self.db.execute(
+        result = await self.session.execute(
             select(func.avg(subquery.c.project_count))
         )
         
         avg = result.scalar()
+
         return float(avg) if avg else 0.0
 
     async def _get_avg_members_per_project(self) -> float:
@@ -71,9 +73,10 @@ class AnalyticsService:
             .group_by(ProjectMembership.project_id)
         ).subquery()
         
-        result = await self.db.execute(
+        result = await self.session.execute(
             select(func.avg(subquery.c.member_count))
         )
         
         avg = result.scalar()
+
         return float(avg) if avg else 0.0

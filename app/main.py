@@ -13,6 +13,11 @@ from app.features.projects import router as projects
 
 settings = get_settings()
 
+app = FastAPI(
+    title="BetterGroup - Challenge",
+    version="1.0.0",
+)
+
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
@@ -40,11 +45,6 @@ def custom_openapi():
 
     return app.openapi_schema
 
-app = FastAPI(
-    title="BetterGroup - Challenge",
-    version="1.0.0",
-)
-
 app.openapi = custom_openapi
 app.add_middleware(APIKeyMiddleware)
 
@@ -52,7 +52,7 @@ app.include_router(companies.router, prefix="/api/v1", tags=["companies"])
 app.include_router(analytics.router, prefix="/api/v1", tags=["analytics"])
 app.include_router(projects.router, prefix="/api/v1", tags=["projects"])
 
-app.get("/health")
+@app.get("/health")
 def health_check():
     return {"status": "healthy"}
 

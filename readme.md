@@ -1,8 +1,14 @@
-# BetterGroup Backend Challenge
+# BetterGroup - Backend Challenge
 
 Index
-- [Database Schema](/docs/db-diagram.md)
+- [Database Design Choices](/docs/db-diagram.md)
+- [Technical Decisions](/docs/technical-decisions.md)
+- [API Guidelines](#api-guidelines)
+- [Quick Start](#quick-start)
+- [Local Development](#local-development)
+
 ## Quick Start
+
 ### Clone and Setup
 
 ```bash
@@ -15,16 +21,16 @@ docker-compose up -d
 
 docker-compose ps
 
-docker-compose logs -f app
+docker-compose logs -f project_management_app
 ```
 
 ###  Initialize Database and Sync Data (if needed)
 ```bash
 # Run database migrations
-docker-compose exec app alembic upgrade head
+docker-compose exec project_management_app alembic upgrade head
 
 # Sync users from external API
-docker-compose exec app python sync_users.py
+docker-compose exec project_management_app python fetch_and_populate.py
 ```
 
 
@@ -41,12 +47,12 @@ alembic upgrade head
 python ./scripts/fetch_and_populate.py
 
 # Start development server
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 ## API Guidelines
 
 ### API Authentication
-All endpoints (except  /docs) require API key authentication:
+All endpoints (except /docs, /redoc and /health) require API key authentication:
 ```bash
 curl -H "X-API-Key: your-api-key" http://localhost:8000/api/v1/companies
 ```

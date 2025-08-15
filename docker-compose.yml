@@ -19,6 +19,7 @@ services:
   app:
     build: .
     command: ./scripts/docker-init.sh
+    container_name: project_management_app
     ports:
       - "8000:8000"
     volumes:
